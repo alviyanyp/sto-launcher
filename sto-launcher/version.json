@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "date": "2026-10-18",
+  "notes": [
+    "Launcher pertama: menu Input STO & Dashboard STO",
+    "Bisa dipasang (install) di HP Android, iPhone, dan PC",
+    "Cek versi aplikasi di Google Drive (Apps Script) otomatis",
+    "Notifikasi saat launcher versi baru tersedia"
+  ]
+}

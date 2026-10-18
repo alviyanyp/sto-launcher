@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STO Harian</title>
+<meta name="description" content="Launcher aplikasi Stock Opname WIP">
+<meta name="theme-color" content="#1f5fae">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="STO Harian">
+<script src="config.js"></script>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#1c2533;--mut:#6b7686;--pri:#1f5fae;--pri2:#143e78;--ok:#1e8e4e;--warn:#fff4d6;--warnb:#e0a400;--err:#c62828;--line:#dde3ea}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1724;--card:#182235;--ink:#e8eef7;--mut:#8a97ab;--line:#26324a;--warn:#3a2f12}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent}
+.hidden{display:none!important}
+/* ---- Menu ---- */
+#home{min-height:100%;display:flex;flex-direction:column}
+.hero{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;padding:calc(18px + env(safe-area-inset-top)) max(18px,calc((100% - 720px)/2 + 14px)) 26px;display:flex;align-items:center;gap:14px}
+.hero img{width:56px;height:56px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hero h1{margin:0;font-size:21px}
+.hero p{margin:3px 0 0;font-size:13px;opacity:.85}
+.hero .sp{flex:1}
+.icon-btn{background:rgba(255,255,255,.15);border:0;color:#fff;width:40px;height:40px;border-radius:50%;font-size:19px;cursor:pointer}
+main{flex:1;width:100%;max-width:720px;margin:-14px auto 0;padding:0 14px 24px}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;display:flex;align-items:center;gap:10px;background:#e3f4ea;color:var(--ok);border:1px solid #b9e2c9}
+.banner.warn{background:var(--warn);color:inherit;border-color:var(--warnb)}
+.banner button{margin-left:auto;border:0;border-radius:8px;padding:8px 12px;font-weight:700;background:var(--ok);color:#fff;cursor:pointer;white-space:nowrap}
+.banner.warn button{background:var(--warnb)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.tiles{grid-template-columns:1fr}}
+.tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--card);color:var(--ink);border:0;border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(16,32,64,.08);cursor:pointer;font:inherit;transition:transform .1s}
+.tile:active{transform:scale(.98)}
+.tile .ic{font-size:30px;line-height:1}
+.tile b{font-size:18px}
+.tile small{color:var(--mut);font-size:13px;line-height:1.4}
+.tile .go{position:absolute;right:16px;top:18px;color:var(--pri);font-size:20px}
+.links{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.links a{flex:1;min-width:140px;text-align:center;background:var(--card);border-radius:12px;padding:12px;color:var(--pri);text-decoration:none;font-weight:600;font-size:14px;box-shadow:0 1px 4px rgba(16,32,64,.06)}
+.card{background:var(--card);border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:0 1px 4px rgba(16,32,64,.06)}
+.card h2{margin:0 0 8px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.card p{margin:6px 0;font-size:14px;line-height:1.5}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;font-size:15px;background:var(--pri);color:#fff;cursor:pointer}
+.btn.sec{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.ver{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.ver span:nth-child(odd){color:var(--mut)}
+details{margin-top:8px;font-size:13px}
+details ul{margin:6px 0 0;padding-left:18px;color:var(--mut)}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:#e3f4ea;color:var(--ok);margin-left:6px}
+.pill.w{background:var(--warn);color:#8a5a00}
+footer{text-align:center;font-size:12px;color:var(--mut);padding:10px 10px calc(14px + env(safe-area-inset-bottom))}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:5px;vertical-align:0}
+.dot.off{background:var(--err)}
+/* ---- Viewer ---- */
+#viewer{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);z-index:10}
+.vbar{display:flex;align-items:center;gap:6px;background:var(--pri);color:#fff;padding:calc(6px + env(safe-area-inset-top)) 8px 6px}
+.vbar button{background:rgba(255,255,255,.15);border:0;color:#fff;height:36px;min-width:36px;padding:0 12px;border-radius:18px;font-size:14px;font-weight:600;cursor:pointer}
+.vbar .t{flex:1;font-weight:700;font-size:15px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-left:4px}
+#frame{flex:1;width:100%;border:0;background:#fff}
+#vMsg{position:absolute;left:0;right:0;top:56px;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--mut);font-size:14px;text-align:center;padding:24px;pointer-events:none}
+#vMsg .btn{pointer-events:auto}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+/* ---- Dialog ---- */
+dialog{border:0;border-radius:16px;padding:0;width:min(520px,94vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:18px}
+.dlg h3{margin:0 0 4px}
+.dlg label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+.dlg input,.dlg select{width:100%;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.dlg .hint{font-size:12px;color:var(--mut);margin-top:4px}
+.dlg .row{display:flex;gap:8px;margin-top:16px}
+.dlg .row .btn{flex:1}
+.steps{font-size:14px;line-height:1.6;padding-left:20px;margin:8px 0}
+</style>
+</head>
+<body>
+
+<div id="home">
+  <header class="hero">
+    <img src="icons/icon-192.png" alt="">
+    <div>
+      <h1 id="appName">STO Harian</h1>
+      <p id="company">Stock Opname WIP</p>
+    </div>
+    <div class="sp"></div>
+    <button class="icon-btn" id="btnSet" title="Pengaturan" aria-label="Pengaturan">⚙</button>
+  </header>
+
+  <main>
+    <div id="updBanner" class="banner hidden">🔄 <span>Versi launcher baru tersedia.</span><button id="btnUpd">Update</button></div>
+    <div id="cfgWarn" class="banner warn hidden">⚠ <span>URL aplikasi (Apps Script) belum diatur.</span><button id="btnCfg">Atur</button></div>
+
+    <div class="tiles">
+      <button class="tile" data-open="input">
+        <span class="ic">📷</span><b>Input STO</b>
+        <small>Foto ID label, salin data kemarin, edit qty, hapus</small>
+        <span class="go">›</span>
+      </button>
+      <button class="tile" data-open="dashboard">
+        <span class="ic">📊</span><b>Dashboard STO</b>
+        <small>Hasil STO realtime per area, QC, PIC, riwayat</small>
+        <span class="go">›</span>
+      </button>
+    </div>
+
+    <div class="links" id="links">
+      <a id="lnkSheet" target="_blank" rel="noopener" class="hidden">📗 Spreadsheet Data</a>
+      <a id="lnkFolder" target="_blank" rel="noopener" class="hidden">📁 Folder Foto (Drive)</a>
+    </div>
+
+    <section class="card" id="installCard">
+      <h2>Pasang Aplikasi</h2>
+      <div id="installReady" class="hidden">
+        <p>Pasang STO Harian di perangkat ini supaya bisa dibuka dari ikon seperti aplikasi biasa.</p>
+        <button class="btn" id="btnInstall">⬇ Install Aplikasi</button>
+      </div>
+      <div id="installIOS" class="hidden">
+        <p>Di iPhone/iPad (Safari):</p>
+        <ol class="steps"><li>Ketuk tombol <b>Bagikan</b> (kotak dengan panah ke atas)</li><li>Pilih <b>Tambah ke Layar Utama</b></li><li>Ketuk <b>Tambah</b></li></ol>
+      </div>
+      <div id="installManual" class="hidden">
+        <p><b>Android (Chrome):</b> menu ⋮ → <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>.<br>
+        <b>PC (Chrome/Edge):</b> klik ikon <b>Instal</b> ⊕ di ujung kanan kolom alamat, atau menu ⋮ → <b>Simpan dan bagikan → Instal halaman sebagai aplikasi</b>.</p>
+      </div>
+      <p id="installDone" class="hidden">✅ Aplikasi sudah terpasang di perangkat ini.</p>
+    </section>
+
+    <section class="card">
+      <h2>Versi</h2>
+      <div class="ver">
+        <span>Aplikasi (Google Drive)</span><span id="vApp">memeriksa…</span>
+        <span>Launcher</span><span id="vLauncher">-</span>
+      </div>
+      <details id="appLog" class="hidden"><summary>Riwayat perubahan aplikasi</summary><ul id="appNotes"></ul></details>
+      <details id="lchLog" class="hidden"><summary>Riwayat perubahan launcher</summary><ul id="lchNotes"></ul></details>
+    </section>
+  </main>
+
+  <footer><span class="dot" id="netDot"></span><span id="netTxt">Online</span> · <span id="footVer"></span></footer>
+</div>
+
+<div id="viewer" class="hidden">
+  <div class="vbar">
+    <button id="vBack" aria-label="Kembali ke menu">‹ Menu</button>
+    <span class="t" id="vTitle"></span>
+    <button id="vReload" title="Muat ulang" aria-label="Muat ulang">↻</button>
+    <button id="vExt" title="Buka di jendela penuh" aria-label="Buka di jendela penuh">↗</button>
+  </div>
+  <iframe id="frame" title="Aplikasi STO" allow="camera; microphone; clipboard-write; fullscreen"></iframe>
+  <div id="vMsg"><div class="spin"></div><div>Memuat aplikasi…</div></div>
+</div>
+
+<dialog id="setDlg">
+  <form class="dlg" method="dialog" id="setForm">
+    <h3>Pengaturan</h3>
+    <div class="hint">Disimpan di perangkat ini saja. Kosongkan untuk memakai nilai dari config.js.</div>
+    <label for="sUrl">URL Web App (Apps Script)</label>
+    <input id="sUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+    <div class="hint" id="sUrlHint"></div>
+    <label for="sMode">Cara membuka aplikasi</label>
+    <select id="sMode">
+      <option value="">Ikuti config.js</option>
+      <option value="inside">Di dalam launcher</option>
+      <option value="tab">Jendela / tab baru</option>
+    </select>
+    <div class="hint">Pilih "Jendela / tab baru" jika aplikasi meminta login Google terus-menerus.</div>
+    <div class="row">
+      <button class="btn sec" value="cancel" type="submit">Batal</button>
+      <button class="btn" id="sSave" value="save" type="submit">Simpan</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const CFG = window.STO_CONFIG || {};
+  const store = {
+    get: k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+    set: (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
+  };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const PAGES = { input: { title: '📷 Input STO', q: '' }, dashboard: { title: '📊 Dashboard STO', q: '?page=dashboard' } };
+
+  const baseUrl = () => (store.get('sto_url') || CFG.APPS_SCRIPT_URL || '').trim();
+  const openMode = () => store.get('sto_mode') || CFG.OPEN_MODE || 'inside';
+  const validUrl = u => /^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[\w-]{20,}\/(exec|dev)$/.test(u);
+  const pageUrl = p => baseUrl() + PAGES[p].q;
+
+  /* ---------- Tampilan awal ---------- */
+  $('appName').textContent = CFG.APP_NAME || 'STO Harian';
+  $('company').textContent = CFG.COMPANY || 'Stock Opname WIP';
+  if (CFG.SHEET_URL) { $('lnkSheet').href = CFG.SHEET_URL; $('lnkSheet').classList.remove('hidden'); }
+  if (CFG.FOLDER_URL) { $('lnkFolder').href = CFG.FOLDER_URL; $('lnkFolder').classList.remove('hidden'); }
+
+  function checkCfg() {
+    const ok = validUrl(baseUrl());
+    $('cfgWarn').classList.toggle('hidden', ok);
+    return ok;
+  }
+  checkCfg();
+
+  /* ---------- Membuka aplikasi ---------- */
+  let current = null, loadTimer = null;
+
+  function open(page, fromHistory) {
+    if (!PAGES[page]) return;
+    if (!checkCfg()) { openSettings(); return; }
+    if (!navigator.onLine) { alert('Tidak ada koneksi internet. Aplikasi STO membutuhkan internet.'); return; }
+    if (openMode() === 'tab') { window.open(pageUrl(page), '_blank', 'noopener'); return; }
+
+    current = page;
+    $('vTitle').textContent = PAGES[page].title;
+    $('home').classList.add('hidden');
+    $('viewer').classList.remove('hidden');
+    showMsg('<div class="spin"></div><div>Memuat aplikasi…</div>');
+    const f = $('frame');
+    if (f.dataset.src !== pageUrl(page)) { f.dataset.src = pageUrl(page); f.src = pageUrl(page); }
+    else hideMsg();
+    clearTimeout(loadTimer);
+    loadTimer = setTimeout(() => showMsg(
+      '<div>Aplikasi lama dimuat atau meminta login.</div>' +
+      '<button class="btn" id="msgExt">↗ Buka di jendela penuh</button>'), 20000);
+    if (!fromHistory) history.pushState({ page }, '', '#' + page);
+    store.set('sto_last', page);
+  }
+
+  function closeViewer(fromHistory) {
+    current = null;
+    $('viewer').classList.add('hidden');
+    $('home').classList.remove('hidden');
+    clearTimeout(loadTimer);
+    if (!fromHistory && location.hash) history.pushState({}, '', location.pathname + location.search);
+  }
+
+  function showMsg(h) {
+    $('vMsg').innerHTML = h; $('vMsg').classList.remove('hidden');
+    const b = document.getElementById('msgExt');
+    if (b) b.onclick = () => window.open(pageUrl(current), '_blank', 'noopener');
+  }
+  function hideMsg() { $('vMsg').classList.add('hidden'); clearTimeout(loadTimer); }
+
+  $('frame').addEventListener('load', () => { if ($('frame').dataset.src) hideMsg(); });
+  document.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => open(b.dataset.open)));
+  $('vBack').onclick = () => history.length > 1 && history.state && history.state.page ? history.back() : closeViewer();
+  $('vReload').onclick = () => { if (!current) return; showMsg('<div class="spin"></div><div>Memuat ulang…</div>'); $('frame').src = pageUrl(current); };
+  $('vExt').onclick = () => current && window.open(pageUrl(current), '_blank', 'noopener');
+
+  window.addEventListener('popstate', () => {
+    const p = location.hash.slice(1);
+    if (PAGES[p]) open(p, true); else closeViewer(true);
+  });
+
+  // Shortcut ikon (#input / #dashboard) langsung membuka halaman
+  const startPage = location.hash.slice(1);
+  if (PAGES[startPage]) { history.replaceState({}, '', location.pathname + location.search); open(startPage); }
+
+  /* ---------- Pengaturan ---------- */
+  function openSettings() {
+    $('sUrl').value = store.get('sto_url');
+    $('sUrl').placeholder = CFG.APPS_SCRIPT_URL || 'https://script.google.com/macros/s/.../exec';
+    $('sMode').value = store.get('sto_mode');
+    urlHint();
+    $('setDlg').showModal();
+  }
+  function urlHint() {
+    const v = $('sUrl').value.trim() || CFG.APPS_SCRIPT_URL || '';
+    $('sUrlHint').textContent = validUrl(v) ? '✓ Format URL benar' : 'Format: https://script.google.com/macros/s/ID_DEPLOYMENT/exec';
+  }
+  $('sUrl').addEventListener('input', urlHint);
+  $('btnSet').onclick = openSettings;
+  $('btnCfg').onclick = openSettings;
+  $('setDlg').addEventListener('close', () => {
+    if ($('setDlg').returnValue !== 'save') return;
+    const u = $('sUrl').value.trim();
+    if (u && !validUrl(u)) { alert('URL tidak valid. Gunakan URL Web App yang berakhiran /exec'); return; }
+    store.set('sto_url', u); store.set('sto_mode', $('sMode').value);
+    $('frame').removeAttribute('src'); delete $('frame').dataset.src;
+    checkCfg(); checkAppVersion();
+  });
+
+  /* ---------- Versi ---------- */
+  function fillNotes(ul, arr) { $(ul).innerHTML = (arr || []).map(n => '<li>' + esc(n) + '</li>').join(''); }
+
+  fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => {
+    $('vLauncher').textContent = 'v' + v.version + ' (' + v.date + ')';
+    $('footVer').textContent = 'Launcher v' + v.version;
+    fillNotes('lchNotes', v.notes); $('lchLog').classList.remove('hidden');
+  }).catch(() => { $('vLauncher').textContent = '(offline)'; });
+
+  function checkAppVersion() {
+    const u = baseUrl();
+    if (!validUrl(u)) { $('vApp').textContent = 'URL belum diatur'; return; }
+    $('vApp').textContent = 'memeriksa…';
+    fetch(u + '?action=version', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(v => {
+        const seen = store.get('sto_app_ver');
+        let h = 'v' + esc(v.version) + ' (' + esc(v.updated) + ')';
+        if (seen && seen !== v.version) h += '<span class="pill">BARU</span>';
+        if (v.setupNeeded) h += '<span class="pill w">jalankan setup()</span>';
+        $('vApp').innerHTML = h;
+        store.set('sto_app_ver', v.version);
+        fillNotes('appNotes', v.changelog); $('appLog').classList.remove('hidden');
+      })
+      .catch(() => {
+        $('vApp').innerHTML = 'tidak bisa dicek <span class="pill w">akses web app perlu "Anyone"</span>';
+      });
+  }
+  checkAppVersion();
+
+  /* ---------- Install (PWA) ---------- */
+  let deferred = null;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     window.matchMedia('(display-mode: window-controls-overlay)').matches || navigator.standalone;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function showInstall(which) {
+    ['installReady', 'installIOS', 'installManual', 'installDone'].forEach(id => $(id).classList.toggle('hidden', id !== which));
+  }
+  showInstall(standalone ? 'installDone' : isIOS ? 'installIOS' : 'installManual');
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; showInstall('installReady'); });
+  $('btnInstall').onclick = async () => {
+    if (!deferred) return;
+    deferred.prompt();
+    await deferred.userChoice.catch(() => null);
+    deferred = null;
+  };
+  window.addEventListener('appinstalled', () => showInstall('installDone'));
+
+  /* ---------- Update launcher (service worker) ---------- */
+  if ('serviceWorker' in navigator) {
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; location.reload(); } });
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      const offer = w => {
+        $('updBanner').classList.remove('hidden');
+        $('btnUpd').onclick = () => w.postMessage('SKIP_WAITING');
+      };
+      if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        w && w.addEventListener('statechange', () => {
+          if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w);
+        });
+      });
+      // cek update tiap kali aplikasi kembali dibuka & tiap 30 menit
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+    }).catch(() => {});
+  }
+
+  /* ---------- Status jaringan ---------- */
+  function net() {
+    const on = navigator.onLine;
+    $('netDot').classList.toggle('off', !on);
+    $('netTxt').textContent = on ? 'Online' : 'Offline — aplikasi STO butuh internet';
+  }
+  window.addEventListener('online', () => { net(); checkAppVersion(); });
+  window.addEventListener('offline', net);
+  net();
+})();
+</script>
+</body>
+</html>
