@@ -3,8 +3,8 @@
   "short_name": "STO Harian",
   "description": "Launcher aplikasi Stock Opname WIP: input STO dengan foto label dan dashboard realtime.",
   "id": "./",
-  "start_url": "./index.html",
-  "scope": "./index.html",
+   "start_url": "./",
+   "scope": "./",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
@@ -38,7 +38,7 @@
     {
       "name": "Input STO",
       "short_name": "Input",
-      "url": "./index.html#input",
+      "url": "./"./#input",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -49,7 +49,7 @@
     {
       "name": "Dashboard STO",
       "short_name": "Dashboard",
-      "url": "./index.html#dashboard",
+      "url": "./"./#dashboard",
       "icons": [
         {
           "src": "icons/icon-192.png",
