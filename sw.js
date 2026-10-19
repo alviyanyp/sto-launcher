@@ -2,7 +2,7 @@
  * Setiap kali file launcher diubah, naikkan CACHE_VERSION (samakan dengan version.json)
  * supaya HP/PC menampilkan tombol "Update".
  */
-const CACHE_VERSION = '1.0.0';
+const CACHE_VERSION = '1.0.1';
 const CACHE = 'sto-launcher-' + CACHE_VERSION;
 const SHELL = [
   './', './index.html', './config.js', './version.json', './manifest.webmanifest',
